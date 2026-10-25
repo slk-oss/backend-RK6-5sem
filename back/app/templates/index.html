@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Главная — RK6 Restaurant{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>РК6 - Ресторан</h1>
+    <p>создано студентом РК6-51Б</p>
+    
+    <div class="hero__actions">
+        <!-- Кнопка меню (пока ведет в никуда) -->
+        <a href="{{ url_for('products.list_products') }}" class="btn btn--primary btn--lg">Смотреть меню</a>
+        
+        <!-- Кнопка регистрации (появляется только если юзер не залогинен) -->
+        {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.register_page') }}" class="btn btn--outline btn--lg">
+                Создать аккаунт
+            </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
