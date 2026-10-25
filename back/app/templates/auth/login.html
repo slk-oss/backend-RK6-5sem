@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Вход - RK6 Restaurant{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <h2>Вход в аккаунт</h2>
+    
+    <form method="post" action="{{ url_for('auth.login_action') }}" class="form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <label class="field">
+            <span>Email</span>
+            <input type="email" name="email" required placeholder="you@example.com">
+        </label>
+        
+        <label class="field">
+            <span>Пароль</span>
+            <input type="password" name="password" required placeholder="••••••••">
+        </label>
+        
+        <button type="submit" class="btn btn--primary btn--block">Войти</button>
+    </form>
+    
+    <p class="auth-card__footer">
+        Нет аккаунта? <a href="{{ url_for('auth.register_page') }}">Зарегистрироваться</a>
+    </p>
+</div>
+{% endblock %}

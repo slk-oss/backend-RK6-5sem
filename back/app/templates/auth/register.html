@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация - RK6 Restaurant{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <h2>Создать аккаунт</h2>
+    
+    <form method="post" action="{{ url_for('auth.register_action') }}" class="form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="field-row">
+            <label class="field">
+                <span>Имя</span>
+                <input type="text" name="first_name" required placeholder="Иван">
+            </label>
+            
+            <label class="field">
+                <span>Фамилия</span>
+                <input type="text" name="last_name" required placeholder="Иванов">
+            </label>
+        </div>
+        
+        <label class="field">
+            <span>Email</span>
+            <input type="email" name="email" required placeholder="you@example.com">
+        </label>
+        
+        <label class="field">
+            <span>Пароль (мин. 8 символов)</span>
+            <input type="password" name="password" required minlength="8" placeholder="••••••••">
+        </label>
+        
+        <button type="submit" class="btn btn--primary btn--block">Зарегистрироваться</button>
+    </form>
+    
+    <p class="auth-card__footer">
+        Уже есть аккаунт? <a href="{{ url_for('auth.login_page') }}">Войти</a>
+    </p>
+</div>
+{% endblock %}
