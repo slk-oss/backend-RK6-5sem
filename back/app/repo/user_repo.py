@@ -1,20 +1,25 @@
 from sqlalchemy import select
 
-from app.database import db
+from sqlalchemy.orm import Session
 from app.models.user import User, UserRole
 
 
 class UserRepo:
+
+    def __init__(self, db: Session):
+        self.db = db
+
+
     def get_by_id(self, user_id: int) -> User | None:
-        return db.session.get(User, user_id)
+        return self.db.get(User, user_id)
 
     def get_by_email(self, email: str) -> User | None:
         stmt = select(User).where(User.email == email)
-        return db.session.execute(stmt).scalar_one_or_none()
+        return self.db.execute(stmt).scalar_one_or_none()
 
     def list_all(self) -> list[User]:
         stmt = select(User).order_by(User.user_id)
-        return list(db.session.execute(stmt).scalars())
+        return list(self.db.execute(stmt).scalars())
 
     def create(
         self,
@@ -32,11 +37,11 @@ class UserRepo:
             last_name=last_name,
             role=role,
         )
-        db.session.add(user)
-        db.session.flush() # Отправляет INSERT в БД, но не коммитит транзакцию
+        self.db.add(user)
+        self.db.flush() # Отправляет INSERT в БД, но не коммитит транзакцию
         return user
 
     def update_role(self, user: User, role: UserRole) -> User:
         user.role = role
-        db.session.flush()
+        self.db.flush()
         return user
