@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.order import Order
-
+from app.models.order import OrderStatus
 
 class OrderRepo:
     def __init__(self, db: Session):
@@ -24,3 +24,11 @@ class OrderRepo:
         self.db.add(order)
         self.db.flush()
         return order
+
+    def get_pending(self, user_id: int) -> Order | None:
+        stmt = (
+            select(Order)
+            .where(Order.user_id == user_id)
+            .where(Order.status == OrderStatus.PENDING)
+        )
+        return self.db.execute(stmt).scalar_one_or_none()
