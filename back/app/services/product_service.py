@@ -1,9 +1,10 @@
 from app.repo.product_repo import ProductRepo
 from app.models.product import Product
+from app import db
 
 class ProductService:
     def __init__(self):
-        self.product_repo = ProductRepo()
+        self.product_repo = ProductRepo(db.session)
 
     def get_menu(self) -> list[Product]:
         return self.product_repo.get_all()

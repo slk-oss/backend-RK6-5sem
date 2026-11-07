@@ -39,4 +39,5 @@ class OrderService:
         )
 
     def get_cart_total(self, order_id: int) -> int:
-        pass
+        items = self.item_repo.get_by_order(order_id)
+        return sum(item.quantity * item.unit_price for item in items)
