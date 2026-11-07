@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required
+from app import db
 
 from app.services.auth_service import (
     AuthService,
@@ -20,7 +21,7 @@ def register_page():
 @bp.post("/register")
 def register_action():
     try:
-        user = AuthService().register(
+        user = AuthService(db.session).register(
             email=request.form["email"],
             password=request.form["password"],
             first_name=request.form.get("first_name"),
@@ -49,7 +50,7 @@ def login_page():
 @bp.post("/login")
 def login_action():
     try:
-        user = AuthService().login(
+        user = AuthService(db.session).login(
             email=request.form["email"],
             password=request.form["password"],
         )
@@ -63,8 +64,7 @@ def login_action():
     login_user(user)
     flash("Добро пожаловать!", "success")
     
-    next_url = request.args.get("next") or url_for("main.index")
-    return redirect(next_url)
+    return redirect(url_for("main.index"))
 
 @bp.get("/logout")
 @login_required

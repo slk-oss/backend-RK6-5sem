@@ -32,3 +32,11 @@ class OrderRepo:
             .where(Order.status == OrderStatus.PENDING)
         )
         return self.db.execute(stmt).scalar_one_or_none()
+
+    def list_all(self) -> list[Order]:
+        stmt = select(Order).order_by(
+            Order.created_at.desc(),
+            Order.order_id.desc(),
+        )
+
+        return list(self.db.execute(stmt).scalars())   

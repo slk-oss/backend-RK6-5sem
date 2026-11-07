@@ -45,4 +45,13 @@ def create_app():
     from app.routes.product_routes import bp as products_bp
     app.register_blueprint(products_bp)
 
+    from app.routes.order_route import bp as order_bp
+    app.register_blueprint(order_bp)
+
+    from app.routes.admin_routes import bp as admin_bp
+    app.register_blueprint(admin_bp)
+    
+    from app.routes.manager_routes import bp as manager_bp
+    app.register_blueprint(manager_bp)
+
     return app

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Корзина — RK6 Restaurant{% endblock %}
+
+{% block content %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/orders.css') }}">
+
+<section class="orders-page">
+    <div class="orders-heading">
+        <div>
+            <h1>Корзина</h1>
+            <p class="orders-muted">Выбранные блюда и сумма заказа</p>
+        </div>
+
+        <a href="{{ url_for('products.list_products') }}"
+           class="btn btn--outline">
+            ← Вернуться в меню
+        </a>
+    </div>
+
+    {% if cart.order_items %}
+        <div class="cart-layout">
+            <div class="orders-panel">
+                {% for item in cart.order_items %}
+                    <article class="order-item">
+                        {% if item.product and item.product.image_url %}
+                            <img class="order-item__image"
+                                 src="{{ item.product.image_url }}"
+                                 alt="{{ item.product.product_name }}">
+                        {% else %}
+                            <div class="order-item__placeholder"
+                                 aria-hidden="true">🍜</div>
+                        {% endif %}
+
+                        <div class="order-item__info">
+                            <h2>
+                                {% if item.product %}
+                                    <a href="{{ url_for(
+                                        'products.detail',
+                                        product_id=item.product_id
+                                    ) }}">
+                                        {{ item.product.product_name }}
+                                    </a>
+                                {% else %}
+                                    Товар №{{ item.product_id }}
+                                {% endif %}
+                            </h2>
+
+                            <p class="orders-muted">
+                                {{ '%.2f'|format(item.unit_price / 100) }} ₽
+                                × {{ item.quantity }} шт.
+                            </p>
+                        </div>
+
+                        <strong class="order-item__total">
+                            {{ '%.2f'|format(
+                                item.unit_price * item.quantity / 100
+                            ) }} ₽
+                        </strong>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <aside class="orders-panel cart-summary">
+                <h2>Ваш заказ</h2>
+
+                <div class="summary-row">
+                    <span class="orders-muted">Количество блюд</span>
+                    <span>
+                        {{ cart.order_items|sum(attribute='quantity') }}
+                    </span>
+                </div>
+
+                <div class="summary-total">
+                    <span>Итого</span>
+                    <strong>{{ '%.2f'|format(total / 100) }} ₽</strong>
+                </div>
+
+                <a href="{{ url_for('products.list_products') }}"
+                   class="btn btn--primary">
+                    Добавить блюда
+                </a>
+
+                <p class="orders-note">
+                    Блюда сохранены в корзине.
+                    Оформление заказа пока недоступно.
+                </p>
+            </aside>
+        </div>
+    {% else %}
+        <div class="orders-panel orders-empty">
+            <div class="orders-empty__icon" aria-hidden="true">🛒</div>
+            <h2>Корзина пока пуста</h2>
+            <p class="orders-muted">
+                Выберите понравившиеся блюда из нашего меню.
+            </p>
+
+            <a href="{{ url_for('products.list_products') }}"
+               class="btn btn--primary">
+                Перейти в меню
+            </a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
