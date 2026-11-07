@@ -141,3 +141,27 @@ body {
     font-weight: bold;
     color: #333;
 }
+
+.navbar__inner {
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.navbar__nav {
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+@media (max-width: 760px) {
+    .navbar__inner {
+        justify-content: center;
+    }
+
+    .navbar__nav {
+        justify-content: center;
+    }
+
+    .navbar__nav .btn {
+        padding: 10px 14px;
+    }
+}
