@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Заказы клиентов — RK6 Restaurant{% endblock %}
+
+{% block content %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/orders.css') }}">
+
+{% set status_names = {
+    'pending': 'Корзина',
+    'confirmed': 'Подтверждён',
+    'cancelled': 'Отменён'
+} %}
+
+<section class="orders-page">
+    <div class="orders-heading">
+        <div>
+            <h1>Заказы клиентов</h1>
+            <p class="orders-muted">
+                Корзины, состав заказов и итоговые суммы
+            </p>
+        </div>
+
+        {% if current_user.role.value == 'admin' %}
+            <a href="{{ url_for('admin.users') }}"
+               class="btn btn--outline">
+                Пользователи →
+            </a>
+        {% endif %}
+    </div>
+
+    {% for order in orders %}
+        {% set status = order.status.value %}
+        {% set amount = namespace(total=0) %}
+
+        <article class="orders-panel manager-order">
+            <div class="order-meta">
+                <div>
+                    <h2 class="manager-order__title">
+                        Заказ №{{ order.order_id }}
+                    </h2>
+
+                    {% if order.user %}
+                        <p>
+                            <strong>
+                                {{ order.user.first_name or 'Без имени' }}
+                                {{ order.user.last_name or '' }}
+                            </strong>
+                        </p>
+
+                        <p class="orders-muted">
+                            {{ order.user.email }}
+                        </p>
+                    {% else %}
+                        <p class="orders-muted">
+                            Клиент №{{ order.user_id }}
+                        </p>
+                    {% endif %}
+
+                    <p class="orders-muted">
+                        {{ order.created_at.strftime('%d.%m.%Y, %H:%M')
+                           if order.created_at else 'Дата не указана' }}
+                    </p>
+                </div>
+
+                <span class="order-status order-status--{{ status }}">
+                    {{ status_names.get(status, status) }}
+                </span>
+            </div>
+
+            {% for item in order.order_items %}
+                {% set amount.total =
+                    amount.total + item.quantity * item.unit_price %}
+
+                <div class="order-item">
+                    {% if item.product and item.product.image_url %}
+                        <img class="order-item__image"
+                             src="{{ item.product.image_url }}"
+                             alt="{{ item.product.product_name }}"
+                             loading="lazy">
+                    {% else %}
+                        <div class="order-item__placeholder"
+                             aria-hidden="true">
+                            🍜
+                        </div>
+                    {% endif %}
+
+                    <div class="order-item__info">
+                        <h2>
+                            {% if item.product %}
+                                <a href="{{ url_for(
+                                    'products.detail',
+                                    product_id=item.product_id
+                                ) }}">
+                                    {{ item.product.product_name }}
+                                </a>
+                            {% else %}
+                                Товар №{{ item.product_id }}
+                            {% endif %}
+                        </h2>
+
+                        <p class="orders-muted">
+                            {{ item.quantity }} шт.
+                            × {{ '%.2f'|format(item.unit_price / 100) }} ₽
+                        </p>
+                    </div>
+
+                    <strong class="order-item__total">
+                        {{ '%.2f'|format(
+                            item.quantity * item.unit_price / 100
+                        ) }} ₽
+                    </strong>
+                </div>
+            {% else %}
+                <p class="orders-muted">В корзине пока нет блюд.</p>
+            {% endfor %}
+
+            <div class="order-grand-total">
+                <span>Итого</span>
+
+                <strong>
+                    {{ '%.2f'|format(amount.total / 100) }} ₽
+                </strong>
+            </div>
+        </article>
+    {% else %}
+        <div class="orders-panel orders-empty">
+            <div class="orders-empty__icon" aria-hidden="true">🍽️</div>
+            <h2>Заказов пока нет</h2>
+
+            <p class="orders-muted">
+                Здесь появятся корзины и заказы клиентов.
+            </p>
+        </div>
+    {% endfor %}
+</section>
+{% endblock %}

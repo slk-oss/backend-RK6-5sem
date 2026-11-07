@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Мои заказы — RK6 Restaurant{% endblock %}
+
+{% block content %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/orders.css') }}">
+
+{% set status_names = {
+    'pending': 'Корзина',
+    'confirmed': 'Подтверждён',
+    'cancelled': 'Отменён'
+} %}
+
+<section class="orders-page">
+    <div class="orders-heading">
+        <div>
+            <h1>Мои заказы</h1>
+            <p class="orders-muted">
+                История заказов и текущая корзина
+            </p>
+        </div>
+
+        <a href="{{ url_for('order.cart') }}"
+           class="btn btn--primary">
+            Открыть корзину
+        </a>
+    </div>
+
+    {% if orders %}
+        <div class="orders-panel orders-table-wrapper">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Номер</th>
+                        <th scope="col">Дата</th>
+                        <th scope="col">Статус</th>
+                        <th scope="col">Сумма</th>
+                        <th scope="col">Действие</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for order in orders %}
+                        {% set status = order.status.value %}
+                        {% set amount = namespace(total=0) %}
+
+                        {% for item in order.order_items %}
+                            {% set amount.total =
+                                amount.total
+                                + item.quantity * item.unit_price %}
+                        {% endfor %}
+
+                        <tr>
+                            <td>
+                                <strong>№{{ order.order_id }}</strong>
+                            </td>
+
+                            <td>
+                                {{ order.created_at.strftime('%d.%m.%Y, %H:%M')
+                                   if order.created_at else '—' }}
+                            </td>
+
+                            <td>
+                                <span class="order-status order-status--{{ status }}">
+                                    {{ status_names.get(status, status) }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <strong>
+                                    {{ '%.2f'|format(amount.total / 100) }} ₽
+                                </strong>
+                            </td>
+
+                            <td>
+                                <a class="orders-link"
+                                   href="{{ url_for(
+                                       'order.order_detail',
+                                       order_id=order.order_id
+                                   ) }}">
+                                    Подробнее →
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="orders-panel orders-empty">
+            <div class="orders-empty__icon" aria-hidden="true">🍽️</div>
+            <h2>Заказов пока нет</h2>
+            <p class="orders-muted">
+                Добавьте блюда в корзину — они появятся здесь.
+            </p>
+
+            <a href="{{ url_for('products.list_products') }}"
+               class="btn btn--primary">
+                Выбрать блюда
+            </a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
