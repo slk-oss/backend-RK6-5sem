@@ -20,4 +20,8 @@ def create_app():
     def health():
         return {"service": "auth-service", "status": "ok"}
 
+    from app.routes.auth_routes import bp as auth_bp
+    app.register_blueprint(auth_bp)
+
+    
     return app
