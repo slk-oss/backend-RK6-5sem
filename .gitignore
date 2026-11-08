@@ -1,0 +1,15 @@
+# Виртуальные окружения во всех каталогах
+.venv/
+venv/
+
+# Кеш Python
+__pycache__/
+*.py[cod]
+
+# Локальные настройки и секреты
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
