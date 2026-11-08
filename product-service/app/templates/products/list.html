@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Меню — RK6 Restaurant{% endblock %}
+
+{% block content %}
+<div class="page-head" style="margin-bottom: 30px;">
+    <h1>Наше меню</h1>
+</div>
+
+{% if products %}
+    <div class="grid grid--products">
+        {% for p in products %}
+            <article class="card">
+                <div class="card__image">
+                    {% if p.image_url %}
+                        <img src="{{ p.image_url }}" alt="{{ p.product_name }}">
+                    {% else %}
+                        <div class="placeholder">🍜</div>
+                    {% endif %}
+                </div>
+                <div class="card__body">
+                    <h3 class="card__title">{{ p.product_name }}</h3>
+                    <p class="card__desc">{{ p.product_description or '' }}</p>
+                    <div class="card__footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
+                        <!-- Делим цену на 100, так как в базе она в копейках -->
+                        <span class="price" style="font-weight: bold; font-size: 1.2rem;">
+                            {{ '%.2f'|format(p.product_price / 100) }} ₽
+                        </span>
+                        <a href="{{ url_for('products.detail', product_id=p.product_id) }}"
+                           class="btn btn--primary">Подробнее</a>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="muted">Пока нет товаров в базе данных.</p>
+{% endif %}
+{% endblock %}
