@@ -33,6 +33,23 @@ services:
       timeout: 3s
       retries: 10
 
+  order-db:
+    image: postgres:16
+    ports:
+      - "127.0.0.1:5436:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${ORDER_DB_PASSWORD:?Set ORDER_DB_PASSWORD in .env}
+      POSTGRES_DB: restaurant_order_db
+    volumes:
+      - order_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d restaurant_order_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
   auth_postgres_data:
   product_postgres_data:
+  order_postgres_data:
