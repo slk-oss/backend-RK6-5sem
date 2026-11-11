@@ -11,6 +11,7 @@ load_dotenv(SERVICE_ROOT / ".env")
 
 class Config:
     SECRET_KEY = os.environ["SECRET_KEY"]
+    REDIS_URL = os.environ["REDIS_URL"]
 
     SQLALCHEMY_DATABASE_URI = URL.create(
         drivername="postgresql+psycopg2",
