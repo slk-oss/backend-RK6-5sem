@@ -4,40 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}RK6 Restaurant{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet"
+      href="{{ url_for('static', filename='css/orders.css') }}">
 </head>
 <body>
     <header class="navbar">
         <div class="container navbar__inner">
-            <a href="{{ url_for('main.index') }}" class="navbar__logo">
+            <a href= "/" class="navbar__logo">
                 🍽️ <span>RK6 Restaurant</span>
             </a>
 
             <nav class="navbar__nav">
-                <a href="{{ url_for('products.list_products') }}" class="btn btn--outline">
+                <a href= "/order/cart" class="btn btn--outline">
                     Меню
                 </a>
 
-                {% if current_user.is_authenticated %}
+                {% if current_user is defined and current_user.is_authenticated %}
                     {% set role = current_user.role.value %}
 
                     {% if role == 'customer' %}
-                        <a href="{{ url_for('order.cart') }}" class="btn btn--outline">
+                        <a href="/order/" class="btn btn--outline">
                             Корзина
                         </a>
-                        <a href="{{ url_for('order.list_orders') }}" class="btn btn--outline">
+                        <a href="/manager/orders" class="btn btn--outline">
                             Мои заказы
                         </a>
                     {% endif %}
 
                     {% if role in ['manager', 'admin'] %}
-                        <a href="{{ url_for('manager.orders') }}" class="btn btn--primary">
+                        <a href="/admin/users" class="btn btn--primary">
                             Заказы клиентов
                         </a>
                     {% endif %}
 
                     {% if role == 'admin' %}
-                        <a href="{{ url_for('admin.users') }}" class="btn btn--outline">
+                        <a href="/admin/users" class="btn btn--outline">
                             Пользователи
                         </a>
                     {% endif %}
@@ -51,14 +54,14 @@
                         }.get(role, role) }}
                     </span>
 
-                    <a href="{{ url_for('auth.logout') }}" class="btn btn--outline">
+                    <a href="/auth/logout" class="btn btn--outline">
                         Выйти
                     </a>
                 {% else %}
-                    <a href="{{ url_for('auth.login_page') }}" class="btn btn--outline">
+                    <a href="/auth/login" class="btn btn--outline">
                         Войти
                     </a>
-                    <a href="{{ url_for('auth.register_page') }}" class="btn btn--primary">
+                    <a href="/auth/register" class="btn btn--primary">
                         Регистрация
                     </a>
                 {% endif %}

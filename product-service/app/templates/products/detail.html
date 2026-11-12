@@ -45,9 +45,9 @@
                 {{ '%.2f'|format(product.product_price / 100) }} ₽
             </div>
 
-            {% if current_user.is_authenticated %}
+            {% if current_user is defined and current_user.is_authenticated %}
                 {% if current_user.role.value == 'customer' %}
-                    <form action="{{ url_for('order.add_to_cart', product_id=product.product_id) }}"
+                    <form action="/order/cart/add/{{ product.product_id }}"
                           method="post">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="quantity" value="1">
@@ -60,14 +60,14 @@
                     </form>
                     
                 {% elif current_user.role.value in ['manager', 'admin'] %}
-                    <a href="{{ url_for('manager.orders') }}"
+                    <a href="/auth/login"
                        class="btn btn--primary"
                        style="display: block; padding: 15px 30px; font-size: 1.1rem; text-align: center;">
                         Заказы клиентов
                     </a>
                 {% endif %}
             {% else %}
-                <a href="{{ url_for('auth.login_page') }}"
+                <a href="/auth/login"
                    class="btn btn--primary"
                    style="display: block; padding: 15px 30px; font-size: 1.1rem; text-align: center;">
                     Войти, чтобы добавить в корзину

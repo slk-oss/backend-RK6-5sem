@@ -10,7 +10,7 @@ csrf = CSRFProtect()
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_url_path="/products/static")
 
     app.config.from_object(Config)
 
