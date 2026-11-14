@@ -8,7 +8,7 @@
 
 {% set status = order.status.value %}
 {% set status_names = {
-    'pending': 'Корзина',
+    'pending': 'Ожидает подтверждения',
     'confirmed': 'Подтверждён',
     'cancelled': 'Отменён'
 } %}
@@ -44,32 +44,15 @@
         {% set amount = namespace(total=0) %}
 
         {% for item in order.order_items %}
-            {% set amount.total =
-                amount.total + item.quantity * item.unit_price %}
+            {% set subtotal = item.quantity * item.unit_price %}
+            {% set amount.total = amount.total + subtotal %}
 
             <article class="order-item">
-                {% if item.product and item.product.image_url %}
-                    <img class="order-item__image"
-                         src="{{ item.product.image_url }}"
-                         alt="{{ item.product.product_name }}">
-                {% else %}
-                    <div class="order-item__placeholder"
-                         aria-hidden="true">🍜</div>
-                {% endif %}
+                <div class="order-item__placeholder"
+                     aria-hidden="true">🍜</div>
 
                 <div class="order-item__info">
-                    <h2>
-                        {% if item.product %}
-                            <a href="{{ url_for(
-                                'products.detail',
-                                product_id=item.product_id
-                            ) }}">
-                                {{ item.product.product_name }}
-                            </a>
-                        {% else %}
-                            Товар №{{ item.product_id }}
-                        {% endif %}
-                    </h2>
+                    <h2>Товар №{{ item.product_id }}</h2>
 
                     <p class="orders-muted">
                         {{ '%.2f'|format(item.unit_price / 100) }} ₽
@@ -78,9 +61,7 @@
                 </div>
 
                 <strong class="order-item__total">
-                    {{ '%.2f'|format(
-                        item.quantity * item.unit_price / 100
-                    ) }} ₽
+                    {{ '%.2f'|format(subtotal / 100) }} ₽
                 </strong>
             </article>
         {% else %}
@@ -89,24 +70,14 @@
 
         <div class="order-grand-total">
             <span>Итого</span>
-            <strong>
-                {{ '%.2f'|format(amount.total / 100) }} ₽
-            </strong>
+            <strong>{{ '%.2f'|format(amount.total / 100) }} ₽</strong>
         </div>
     </div>
 
     <div class="orders-actions">
-        <a href="{{ url_for('products.list_products') }}"
-           class="btn btn--primary">
+        <a href="/products/" class="btn btn--primary">
             Перейти в меню
         </a>
-
-        {% if status == 'pending' %}
-            <a href="{{ url_for('order.cart') }}"
-               class="btn btn--outline">
-                Открыть корзину
-            </a>
-        {% endif %}
     </div>
 </section>
 {% endblock %}

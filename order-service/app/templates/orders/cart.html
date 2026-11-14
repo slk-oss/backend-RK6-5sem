@@ -13,34 +13,29 @@
             <p class="orders-muted">Выбранные блюда и сумма заказа</p>
         </div>
 
-        <a href="{{ url_for('products.list_products') }}"
-           class="btn btn--outline">
+        <a href="/products/" class="btn btn--outline">
             ← Вернуться в меню
         </a>
     </div>
 
-    {% if cart.order_items %}
+    {% if cart_error is defined and cart_error %}
+        <div class="orders-panel" role="alert">
+            <p>{{ cart_error }}</p>
+        </div>
+
+    {% elif items %}
         <div class="cart-layout">
             <div class="orders-panel">
-                {% for item in cart.order_items %}
+                {% for item in items %}
                     <article class="order-item">
-                        {% if item.product and item.product.image_url %}
-                            <img class="order-item__image"
-                                 src="{{ item.product.image_url }}"
-                                 alt="{{ item.product.product_name }}">
-                        {% else %}
-                            <div class="order-item__placeholder"
-                                 aria-hidden="true">🍜</div>
-                        {% endif %}
+                        <div class="order-item__placeholder"
+                             aria-hidden="true">🍜</div>
 
                         <div class="order-item__info">
                             <h2>
-                                {% if item.product %}
-                                    <a href="{{ url_for(
-                                        'products.detail',
-                                        product_id=item.product_id
-                                    ) }}">
-                                        {{ item.product.product_name }}
+                                {% if item.product_name is not none %}
+                                    <a href="/products/{{ item.product_id }}">
+                                        {{ item.product_name }}
                                     </a>
                                 {% else %}
                                     Товар №{{ item.product_id }}
@@ -48,15 +43,21 @@
                             </h2>
 
                             <p class="orders-muted">
-                                {{ '%.2f'|format(item.unit_price / 100) }} ₽
-                                × {{ item.quantity }} шт.
+                                {% if item.unit_price is not none %}
+                                    {{ '%.2f'|format(item.unit_price / 100) }} ₽
+                                    × {{ item.quantity }} шт.
+                                {% else %}
+                                    Товар недоступен · {{ item.quantity }} шт.
+                                {% endif %}
                             </p>
                         </div>
 
                         <strong class="order-item__total">
-                            {{ '%.2f'|format(
-                                item.unit_price * item.quantity / 100
-                            ) }} ₽
+                            {% if item.subtotal is not none %}
+                                {{ '%.2f'|format(item.subtotal / 100) }} ₽
+                            {% else %}
+                                —
+                            {% endif %}
                         </strong>
                     </article>
                 {% endfor %}
@@ -67,18 +68,21 @@
 
                 <div class="summary-row">
                     <span class="orders-muted">Количество блюд</span>
-                    <span>
-                        {{ cart.order_items|sum(attribute='quantity') }}
-                    </span>
+                    <span>{{ items|sum(attribute='quantity') }}</span>
                 </div>
 
                 <div class="summary-total">
                     <span>Итого</span>
-                    <strong>{{ '%.2f'|format(total / 100) }} ₽</strong>
+                    <strong>
+                        {% if total is not none %}
+                            {{ '%.2f'|format(total / 100) }} ₽
+                        {% else %}
+                            Цена недоступна
+                        {% endif %}
+                    </strong>
                 </div>
 
-                <a href="{{ url_for('products.list_products') }}"
-                   class="btn btn--primary">
+                <a href="/products/" class="btn btn--primary">
                     Добавить блюда
                 </a>
 
@@ -88,6 +92,7 @@
                 </p>
             </aside>
         </div>
+
     {% else %}
         <div class="orders-panel orders-empty">
             <div class="orders-empty__icon" aria-hidden="true">🛒</div>
@@ -96,8 +101,7 @@
                 Выберите понравившиеся блюда из нашего меню.
             </p>
 
-            <a href="{{ url_for('products.list_products') }}"
-               class="btn btn--primary">
+            <a href="/products/" class="btn btn--primary">
                 Перейти в меню
             </a>
         </div>

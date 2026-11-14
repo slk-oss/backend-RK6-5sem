@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, func
+from sqlalchemy import Column, DateTime, Integer, func
 from sqlalchemy.orm import relationship
 import enum 
 from sqlalchemy.dialects.postgresql import ENUM as PgEnum
@@ -14,7 +14,7 @@ class Order(Base):
     __tablename__ = "orders"
 
     order_id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    user_id = Column(Integer, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     status = Column(
         PgEnum(OrderStatus, name='order_status', create_type=False,
@@ -23,8 +23,6 @@ class Order(Base):
         default=OrderStatus.PENDING,
         server_default='pending',
     )
-
-    user = relationship("User", back_populates="orders")
 
     order_items = relationship(
         "OrderItem",

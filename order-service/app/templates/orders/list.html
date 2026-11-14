@@ -7,7 +7,7 @@
       href="{{ url_for('static', filename='css/orders.css') }}">
 
 {% set status_names = {
-    'pending': 'Корзина',
+    'pending': 'Ожидает подтверждения',
     'confirmed': 'Подтверждён',
     'cancelled': 'Отменён'
 } %}
@@ -16,13 +16,10 @@
     <div class="orders-heading">
         <div>
             <h1>Мои заказы</h1>
-            <p class="orders-muted">
-                История заказов и текущая корзина
-            </p>
+            <p class="orders-muted">История оформленных заказов</p>
         </div>
 
-        <a href="{{ url_for('order.cart') }}"
-           class="btn btn--primary">
+        <a href="{{ url_for('order.cart') }}" class="btn btn--primary">
             Открыть корзину
         </a>
     </div>
@@ -47,14 +44,11 @@
 
                         {% for item in order.order_items %}
                             {% set amount.total =
-                                amount.total
-                                + item.quantity * item.unit_price %}
+                                amount.total + item.quantity * item.unit_price %}
                         {% endfor %}
 
                         <tr>
-                            <td>
-                                <strong>№{{ order.order_id }}</strong>
-                            </td>
+                            <td><strong>№{{ order.order_id }}</strong></td>
 
                             <td>
                                 {{ order.created_at.strftime('%d.%m.%Y, %H:%M')
@@ -75,10 +69,8 @@
 
                             <td>
                                 <a class="orders-link"
-                                   href="{{ url_for(
-                                       'order.order_detail',
-                                       order_id=order.order_id
-                                   ) }}">
+                                   href="{{ url_for('order.order_detail',
+                                                    order_id=order.order_id) }}">
                                     Подробнее →
                                 </a>
                             </td>
@@ -92,11 +84,10 @@
             <div class="orders-empty__icon" aria-hidden="true">🍽️</div>
             <h2>Заказов пока нет</h2>
             <p class="orders-muted">
-                Добавьте блюда в корзину — они появятся здесь.
+                Оформленные заказы появятся здесь.
             </p>
 
-            <a href="{{ url_for('products.list_products') }}"
-               class="btn btn--primary">
+            <a href="/products/" class="btn btn--primary">
                 Выбрать блюда
             </a>
         </div>
