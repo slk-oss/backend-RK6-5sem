@@ -6,7 +6,7 @@ from sqlalchemy import URL
 
 
 SERVICE_ROOT = Path(__file__).resolve().parent.parent
-load_dotenv(SERVICE_ROOT / ".env")
+load_dotenv(Path(__file__).resolve().parents[1] / ".env.local")
 
 
 class Config:

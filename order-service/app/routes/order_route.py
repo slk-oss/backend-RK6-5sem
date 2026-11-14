@@ -1,62 +1,99 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_login import current_user, login_required
+from redis.exceptions import RedisError
 
-from app.services.order_service import OrderService
 from app.access import group_required
-from app import db
+from app.database import db
+from app.services.order_service import CartError, CatalogUnavailable, OrderService
 
-bp = Blueprint('order', __name__, url_prefix='/order')
+bp = Blueprint("order", __name__, url_prefix="/order")
 
 
-@bp.route('/<int:order_id>')
+def _get_service() -> OrderService:
+    return OrderService(
+        db=db.session,
+        redis=current_app.extensions["redis"],
+        product_service_url=current_app.config["PRODUCT_SERVICE_URL"],
+    )
+
+
+@bp.get("/<int:order_id>")
 @login_required
 @group_required
-def order_detail(order_id):
-    service = OrderService(db.session)
-    order = service.order_repo.get_by_id(order_id)
+def order_detail(order_id: int):
+    order = _get_service().order_repo.get_by_id(order_id)
 
-    if not order or order.user_id != current_user.user_id:
-        flash('Заказ не найден.', 'error')
-        return redirect(url_for('main.index'))
+    if order is None or order.user_id != current_user.user_id:
+        abort(404)
 
-    return render_template('orders/detail.html', order=order)
+    return render_template("orders/detail.html", order=order)
 
 
-@bp.route('/cart', methods=['GET'])
+@bp.get("/cart")
 @login_required
 @group_required
 def cart():
-    service = OrderService(db.session)
-    cart = service.get_or_create_cart(user_id=current_user.user_id)
-    db.session.commit()
+    try:
+        items = _get_service().get_cart(current_user.user_id)
+    except CatalogUnavailable as exc:
+        return render_template(
+            "orders/cart.html", items=[], total=None, cart_error=str(exc)
+        ), 503
+    except RedisError:
+        current_app.logger.exception("Failed to read cart from Redis")
+        return render_template(
+            "orders/cart.html",
+            items=[],
+            total=None,
+            cart_error="Корзина временно недоступна.",
+        ), 503
 
-    total = service.get_cart_total(cart.order_id)
-    return render_template('orders/cart.html', cart=cart, total=total)
+    subtotals = [item.subtotal for item in items]
+    total = (
+        sum(value for value in subtotals if value is not None)
+        if all(value is not None for value in subtotals)
+        else None
+    )
+    return render_template("orders/cart.html", items=items, total=total)
 
 
-@bp.route('/cart/add/<int:product_id>', methods=['POST'])
+@bp.post("/cart/add/<int:product_id>")
 @login_required
 @group_required
-def add_to_cart(product_id):
-    service = OrderService(db.session)
+def add_to_cart(product_id: int):
     try:
-        quantity = int(request.form.get('quantity', 1))
-        service.add_to_cart(
-            user_id=current_user.user_id,
-            product_id=product_id,
-            quantity=quantity,
-        )
-        db.session.commit()
-        flash('Товар добавлен в корзину', 'success')
-    except ValueError as e:
-        db.session.rollback()
-        flash(str(e), 'error')
-    return redirect(url_for('order.cart'))
+        quantity = int(request.form.get("quantity", "1"))
+    except ValueError:
+        flash("Количество должно быть целым числом.", "error")
+        return redirect(url_for("order.cart"), code=303)
 
-@bp.route('/', methods=['GET'])
+    try:
+        _get_service().add_to_cart(current_user.user_id, product_id, quantity)
+    except CatalogUnavailable as exc:
+        abort(503, description=str(exc))
+    except CartError as exc:
+        flash(str(exc), "error")
+    except RedisError:
+        current_app.logger.exception("Failed to update cart in Redis")
+        abort(503, description="Корзина временно недоступна.")
+    else:
+        flash("Товар добавлен в корзину.", "success")
+
+    return redirect(url_for("order.cart"), code=303)
+
+
+@bp.get("/")
 @login_required
 @group_required
 def list_orders():
-    service = OrderService(db.session)
-    orders = service.order_repo.get_by_user(current_user.user_id)
-    return render_template('orders/list.html', orders=orders)
+    orders = _get_service().order_repo.get_by_user(current_user.user_id)
+    return render_template("orders/list.html", orders=orders)

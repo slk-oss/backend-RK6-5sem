@@ -12,11 +12,7 @@ class OrderItem(Base):
         ForeignKey("orders.order_id", ondelete="CASCADE"),
         primary_key=True,
     )
-    product_id = Column(
-        Integer,
-        ForeignKey("products.product_id", ondelete="RESTRICT"),
-        primary_key=True,
-    )
+    product_id = Column(Integer, primary_key=True)
     quantity = Column(Integer, nullable=False)
     unit_price = Column(Integer, nullable=False) 
 
@@ -26,4 +22,3 @@ class OrderItem(Base):
     )
 
     order = relationship("Order", back_populates="order_items")
-    product = relationship("Product", back_populates="order_items")

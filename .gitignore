@@ -10,6 +10,8 @@ __pycache__/
 .env
 .env.*
 !.env.example
+/order-service/.env.local
 
 # macOS
 .DS_Store
+
