@@ -16,5 +16,3 @@ class Product(Base):
     __table_args__ = (
         CheckConstraint("product_price > 0", name="product_price_check"),
     )
-
-    order_items = relationship("OrderItem", back_populates="product")
