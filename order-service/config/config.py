@@ -6,7 +6,7 @@ from sqlalchemy import URL
 
 
 SERVICE_ROOT = Path(__file__).resolve().parents[1]
-load_dotenv(SERVICE_ROOT / ".env")
+load_dotenv(Path(__file__).resolve().parents[1] / ".env.local")
 
 
 class Config:
@@ -19,3 +19,7 @@ class Config:
         database=os.environ["DB_NAME"],
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    SECRET_KEY = os.environ["SECRET_KEY"]
+    REDIS_URL = os.environ["REDIS_URL"]
+    PRODUCT_SERVICE_URL = os.environ["PRODUCT_SERVICE_URL"]
